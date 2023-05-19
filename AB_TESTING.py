@@ -1,50 +1,45 @@
 #####################################################
-# AB Testi ile BiddingYöntemlerinin Dönüşümünün Karşılaştırılması
+# Comparison of AB Test and Conversion of Bidding Methods
 #####################################################
 
 #####################################################
-# İş Problemi
+# Task 1: Preparing and Analyzing Data
 #####################################################
 
-# Facebook kısa süre önce mevcut "maximumbidding" adı verilen teklif verme türüne alternatif
-# olarak yeni bir teklif türü olan "average bidding"’i tanıttı. Müşterilerimizden biri olanbombabomba.com,
-# bu yeni özelliği test etmeye karar verdi veaveragebidding'in maximumbidding'den daha fazla dönüşüm
-# getirip getirmediğini anlamak için bir A/B testi yapmak istiyor.A/B testi 1 aydır devam ediyor ve
-# bombabomba.com şimdi sizden bu A/B testinin sonuçlarını analiz etmenizi bekliyor.Bombabomba.com için
-# nihai başarı ölçütü Purchase'dır. Bu nedenle, istatistiksel testler için Purchasemetriğine odaklanılmalıdır.
-
-
-#####################################################
-# Veri Seti Hikayesi
-#####################################################
-
-# Bir firmanın web site bilgilerini içeren bu veri setinde kullanıcıların gördükleri ve tıkladıkları
-# reklam sayıları gibi bilgilerin yanı sıra buradan gelen kazanç bilgileri yer almaktadır.Kontrol ve Test
-# grubu olmak üzere iki ayrı veri seti vardır. Bu veri setleri ab_testing.xlsx excel’inin ayrı sayfalarında yer
-# almaktadır. Kontrol grubuna Maximum Bidding, test grubuna AverageBidding uygulanmıştır.
-
-# impression: Reklam görüntüleme sayısı
-# Click: Görüntülenen reklama tıklama sayısı
-# Purchase: Tıklanan reklamlar sonrası satın alınan ürün sayısı
-# Earning: Satın alınan ürünler sonrası elde edilen kazanç
+# Facebook alternative to the recently available bidding type called "maximumbidding" As 
+# it revives a new type of bidding, "average bidding". One of the protectors, bombambomba.com,
+# decided to test this new feature and make averagebidding more performance than maximumbidding wants to run an A/B test to see if it returns 
+# The A/B test continues to store 1 and
+# bombabomba.com is now waiting for you to analyze the results of this A/B test.For Bombamboba.com
+# The ultimate measure of success is Purchasing. Therefore, the focus should be on Purchasing metric for constraints.
 
 #####################################################
-# Proje Görevleri
+# Dataset Story
+#####################################################
+
+# What users see and click in this dataset, which includes a company's website information
+# There is information such as the number of advertisements, as well as the earnings information from here. Control and Test There are two separate data sets, the 
+# group. These datasets are on separate sheets of the ab_testing.xlsx excel.
+# takes. Maximum Bidding was applied to the control group and AverageBidding was applied to the test group.
+
+# impression: Number of ad views
+# Click: Number of clicks on the displayed ad
+# Purchase: The number of products purchased after the ads clicked
+# Earning: Earnings after purchased products
+
+#####################################################
+# TASKS
 #####################################################
 
 #####################################################
-# Görev 1:  Veriyi Hazırlama ve Analiz Etme
+# Tasks 1:
 #####################################################
-
-# Adım 1:  ab_testing_data.xlsx adlı kontrol ve test grubu verilerinden oluşan veri setini okutunuz. Kontrol ve test grubu verilerini ayrı değişkenlere atayınız.
-
 
 import pandas as pd
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import shapiro, levene, ttest_ind
-
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.expand_frame_repr', False)
@@ -55,9 +50,6 @@ dataframe_test = pd.read_excel("/Users/dlaraalcan/Desktop/ab_testing.xlsx" , she
 
 df_control = dataframe_control.copy()
 df_test = dataframe_test.copy()
-
-# Adım 2: Kontrol ve test grubu verilerini analiz ediniz.
-
 
 def check_df(dataframe, head=5):
     print("##################### Shape #####################")
@@ -76,9 +68,6 @@ def check_df(dataframe, head=5):
 check_df(df_control)
 check_df(df_test)
 
-
-# Adım 3: Analiz işleminden sonra concat metodunu kullanarak kontrol ve test grubu verilerini birleştiriniz.
-
 df_control["group"] = "control"
 df_test["group"] = "test"
 
@@ -88,126 +77,61 @@ df.shape
 
 df.groupby("group").agg({"Purchase": "mean"})
 
-
 #####################################################
-# Görev 2:  A/B Testinin Hipotezinin Tanımlanması
+# Task 2:  A/B Test Hypothesis
 #####################################################
 
-# Adım 1: Hipotezi tanımlayınız.
-
-# H0 : M1 = M2 (Kontrol grubu ve test grubu satın alma ortalamaları arasında fark yoktur.)
-# H1 : M1!= M2 (Kontrol grubu ve test grubu satın alma ortalamaları arasında fark vardır.)
-
-
-# Adım 2: Kontrol ve test grubu için purchase(kazanç) ortalamalarını analiz ediniz
+# H0 : M1 = M2 There is no difference between the purchasing averages of the two groups.
+# H1 : M1!= M2 There is a difference between the purchase averages of the two groups.
 
 df.groupby("group").agg({"Purchase": "mean"})
 
-
-
 #####################################################
-# GÖREV 3: Hipotez Testinin Gerçekleştirilmesi
+# TASK 3
 #####################################################
+##################################################
+# AB Testing (Independent Two Sample T Test)
+##################################################
 
-# Adım 1: Hipotez testi yapılmadan önce varsayım kontrollerini yapınız.Bunlar Normallik Varsayımı ve Varyans Homojenliğidir.
+# Step 1: Check the assumptions before testing the hypothesis. These are Assumption of Normality and Homogeneity of Variance.
 
-# Kontrol ve test grubunun normallik varsayımına uyup uymadığını Purchase değişkeni üzerinden ayrı ayrı test ediniz
-# Normallik Varsayımı :
-# H0: Normal dağılım varsayımı sağlanmaktadır.
-# H1: Normal dağılım varsayımı sağlanmamaktadır
-# p < 0.05 H0 RED
-# p > 0.05 H0 REDDEDİLEMEZ
-# Test sonucuna göre normallik varsayımı kontrol ve test grupları için sağlanıyor mu ?
-# Elde edilen p-valuedeğerlerini yorumlayınız.
+# Test separately whether the control and test groups comply with the normality assumption via the Purchase variable.
 
-
-# Normal Dağılım: Ortalama ve medyan birbirine eşittir.
+# H0: Normal distribution assumption is provided.
+# H1:..not provided
 
 test_stat, pvalue = shapiro(df.loc[df["group"] == "control", "Purchase"])
 print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
 
 # p-value=0.5891
-# HO reddedilemez. Control grubunun değerleri normal dağılım varsayımını sağlamaktadır.
+# p-value>0.05 H0 cannot be rejected.
 
-test_stat, pvalue = shapiro(df.loc[df["group"] == "test", "Purchase"])
+# When we applied the normality assumption test in both groups, the P value values showed that we provided the normality assumption.
+
+#######################################
+# Assumption of Variance Homogeneity
+#######################################
+
+# H0: Variances are Homogeneous
+# H1: Variances Are Not Homogeneous
+test_stat, pvalue = levene(test_group["Purchase"],
+                           control_group["Purchase"].dropna())
 print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
 
-#####################################################
+# Test Stat = 2.6393, p-value = 0.1083
+# p-value>0.05 H0 cannot be rejected. Variances are homogeneously distributed.
 
-# Normal Dagılomı gözlemlemek adına görselleştirelim:
+# Step 2: Select the appropriate test according to the Normality Assumption and Variance Homogeneity results
+# We will apply parametric test as it provides the assumption of Normality and Homogeneity of Variance.
 
-# Normal Dağılım: Ortalama ve medyan birbirine eşittir.
-
-import seaborn as sns
-
-# Histogram, nümerik değişkenlerin dağılımlarını görselleştirmede kullanılır.
-# Tanımlanan grafik değişkenin histogram ve yoğunluğunu gösterir.
-# Sadece histogramı görmek istersek kde parametresini False yapmamız yeterlidir.
-
-def create_displot(dataframe, col):
-    sns.displot(data=dataframe, x=col, kde=True)
-    plt.show()
-
-create_displot(df_control, "Purchase")
-
-df_control["Purchase"].mean()
-###################################################
-
-test_stat, pvalue = shapiro(df.loc[df["group"] == "test", "Purchase"])
+test_stat, pvalue = ttest_ind(test_group["Purchase"],
+                              control_group["Purchase"],
+                              equal_var=True)  # We would do the Welch test if variance homogeneities were not provided (it would be equal_var=False)
 print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
+# Test Stat = 0.9416, p-value = 0.3493
 
+# Step 3: Purchasing control and test groups, taking into account the p_value obtained as a result of the test
+# Comment if there is a statistically significant difference between the # means.
 
-# Her ikisinin de dagılımını gözlemlemek adına:
-for group in list(df["group"].unique()):
-    pvalue = shapiro(df.loc[df["group"] == group, "Purchase"])[1] #shapironun 1. indexteki degeri
-    print(group,'p-value = %.4f' % pvalue)
-
-
-# Varyans Homojenliği :
-
-# grupların varyanslarının birbirine benzer olduğunu ifade eder.
-
-# H0: Varyanslar homojendir.
-# H1: Varyanslar homojen Değildir.
-# p < 0.05 H0 RED
-# p > 0.05 H0 REDDEDİLEMEZ
-# Kontrol ve test grubu için varyans homojenliğinin sağlanıp sağlanmadığını Purchase değişkeni üzerinden test ediniz.
-# Test sonucuna göre normallik varsayımı sağlanıyor mu? Elde edilen p-value değerlerini yorumlayınız.
-
-test_stat, pvalue = levene(df.loc[df["group"] == "control", "Purchase"],
-                           df.loc[df["group"] == "test", "Purchase"])
-print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
-
-# p-value=0.1083
-# HO reddedilemez. Control ve Test grubunun değerleri varyans homejenliği varsayımını sağlamaktadır.
-# Varyanslar Homojendir.
-
-
-# Adım 2: Normallik Varsayımı ve VaryansHomojenliği sonuçlarına göre uygun testi seçiniz
-
-# Varsayımlar sağlandığı için bağımsız iki örneklem t testi (parametrik test) yapılmaktadır.
-# H0: M1 = M2 (Kontrol grubu ve test grubu satın alma ortalamaları arasında ist. ol.anl.fark yoktur.)
-# H1: M1 != M2 (Kontrol grubu ve test grubu satın alma ortalamaları arasında ist. ol.anl.fark vardır)
-# p<0.05 HO RED , p>0.05 HO REDDEDİLEMEZ
-
-test_stat, pvalue = ttest_ind(df.loc[df["group"] == "control", "Purchase"],
-                              df.loc[df["group"] == "test", "Purchase"],
-                              equal_var=True) # Varyans homojemligi saglanmıyor olsaydı equal_var = False Weltch testini yapmasını saglar.
-
-print('Test Stat = %.4f, p-value = %.4f' % (test_stat, pvalue))
-
-# Adım 3: Test sonucunda elde edilen p_valuedeğerini göz önünde bulundurarak kontrol ve test grubu satın alma
-# ortalamaları arasında istatistiki olarak anlamlı bir fark olup olmadığını yorumlayınız.
-
-# p-value=0.3493
-
-# HO reddedilemez. Kontrol ve test grubu satın alma ortalamaları arasında istatistiksel olarak anlamlı farklılık yoktur.
-
-
-##############################################################
-# GÖREV 4 : Sonuçların Analizi
-##############################################################
-
-# Adım 1: Hangi testi kullandınız, sebeplerini belirtiniz.
-
-# Adım 2: Elde ettiğiniz test sonuçlarına göre müşteriye tavsiyede bulununuz.
+# p-value>0.05 H0 cannot be rejected. It showed that there was no difference between the two groups.
+# Observes that there is no statistically significant difference
